@@ -7,7 +7,7 @@ from simple_app.models import UserProfile
 def valid_login(username, password):
     """ User login validation function """
     if username and password:
-        profile = UserProfile.query.filter_by(username=username)
+        profile = UserProfile.query.filter_by(username=username).first()
         if profile and profile.password == password:
             return True
 
@@ -40,7 +40,8 @@ def registration():
     error = None
     if request.method == 'POST':
         username = escape(request.form.get('username'))
-        if username and not UserProfile.query.filter_by(username=username):
+        if username and not UserProfile.query.filter_by(
+                username=username).first():
             password = escape(request.form.get('password'))
             password2 = escape(request.form.get('password2'))
             if password and password == password2:
@@ -54,6 +55,8 @@ def registration():
                         firstname=firstname)
                     db.session.add(profile)
                     db.session.commit()
+                    log_the_user_in(username)
+                    return render_template('profile.html')
                 else:
                     error = 'Lastname/Firstname fields are empty'
             else:
