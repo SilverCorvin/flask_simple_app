@@ -46,7 +46,7 @@ def login():
         password = escape(request.form.get('password'))
         if valid_login(username, password):
             log_the_user_in(username)
-            return render_template('profile.html')
+            return redirect(url_for('profile'))
         else:
             error = 'Invalid username/login'
     return render_template('login.html', error=error)
@@ -65,12 +65,12 @@ def registration():
                 lastname = escape(request.form.get('lastname'))
                 firstname = escape(request.form.get('firstname'))
                 if lastname and firstname:
-                    profile = UserProfile(
+                    user = UserProfile(
                         username=username,
                         password=password,
                         lastname=lastname,
                         firstname=firstname)
-                    db.session.add(profile)
+                    db.session.add(user)
                     db.session.commit()
                     log_the_user_in(username)
                     return redirect(url_for('profile'))
@@ -94,4 +94,22 @@ def logout():
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    return render_template('profile.html')
+    error = None
+    username = escape(session.get('username'))
+    user = UserProfile.query.filter_by(username=username).first()
+    if request.method == 'POST':
+        password = escape(request.form.get('password'))
+        password2 = escape(request.form.get('password2'))
+        if password and password == password2:
+            lastname = escape(request.form.get('lastname'))
+            firstname = escape(request.form.get('firstname'))
+            if lastname and firstname:
+                user.password = password
+                user.lastname = lastname
+                user.firstname = firstname
+                db.session.commit()
+            else:
+                error = 'Lastname/Firstname fields are empty'
+        else:
+            error = 'Passwords not match/or passwords fields are empty'
+    return render_template('profile.html', user=user, error=error)

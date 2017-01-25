@@ -12,6 +12,6 @@ class UserProfile(db.Model):
 
     def __init__(self, username, password, lastname, firstname):
         self.username = username
-        self.password = self.password
+        self.password = password
         self.lastname = lastname
         self.firstname = firstname
