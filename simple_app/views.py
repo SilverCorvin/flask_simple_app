@@ -12,7 +12,7 @@ from simple_app.models import UserProfile
 @app.before_request
 def csrf_protect():
     """Simple function for checking that csrf_token exists in request
-    and is equal to session csrf_token value
+     and is equal to session csrf_token value
     """
     if request.method == "POST":
         token = session.pop('_csrf_token', None)
@@ -45,7 +45,9 @@ def log_the_user_in(username):
 
 
 def login_required(f):
-    """Login required decorator for protecting resources from anonymous access"""
+    """Login required decorator for protecting
+     resources from anonymous access
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('logged_in'):
