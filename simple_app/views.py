@@ -1,13 +1,37 @@
 from functools import wraps
+from hashlib import sha256
+from os import urandom
 
-from flask import request, render_template, redirect, url_for, escape, session
+from flask import request, render_template, redirect, url_for, escape, \
+    session, abort
 
 from simple_app import app, db
 from simple_app.models import UserProfile
 
 
+@app.before_request
+def csrf_protect():
+    """Simple function to check if csrf_token exists in request
+    and is equal to session value
+    """
+    if request.method == "POST":
+        token = session.pop('_csrf_token', None)
+        if not token or token != request.form.get('_csrf_token'):
+            abort(403)
+
+
+def generate_csrf_token():
+    """Function to generate csrf_token and add it to session"""
+    if '_csrf_token' not in session:
+        session['_csrf_token'] = sha256(urandom(128)).hexdigest()
+    return session['_csrf_token']
+
+
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
+
+
 def valid_login(username, password):
-    """ User login validation function """
+    """User login validation function"""
     if username and password:
         profile = UserProfile.query.filter_by(username=username).first()
         if profile and profile.password == password:

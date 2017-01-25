@@ -11,6 +11,7 @@
         <div class="main-login main-center">
           <form class="form-horizontal" method="post" action="{{ url_for('registration') }}">
             <p>{% if error %}{{ error }}{% endif %}</p>
+            <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
             <div class="form-group">
               <label for="lastname" class="cols-sm-2 control-label">Your LastName</label>
               <div class="cols-sm-10">
