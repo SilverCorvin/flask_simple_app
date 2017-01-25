@@ -1,3 +1,5 @@
+from functools import wraps
+
 from flask import request, render_template, redirect, url_for, escape, session
 
 from simple_app import app, db
@@ -13,16 +15,31 @@ def valid_login(username, password):
 
 
 def log_the_user_in(username):
-    """ User login function"""
+    """ User login function """
+    session['logged_in'] = True
+    session['username'] = username
+
+
+def login_required(f):
+    """ Login required decorator to protect resources from anonymous access """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 @app.route('/')
+@login_required
 def index():
-    return redirect(url_for('login'))
+    return redirect(url_for('profile'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if session.get('logged_in'):
+        return redirect(url_for('profile'))
     error = None
     if request.method == 'POST':
         username = escape(request.form.get('username'))
@@ -56,7 +73,7 @@ def registration():
                     db.session.add(profile)
                     db.session.commit()
                     log_the_user_in(username)
-                    return render_template('profile.html')
+                    return redirect(url_for('profile'))
                 else:
                     error = 'Lastname/Firstname fields are empty'
             else:
@@ -67,11 +84,14 @@ def registration():
 
 
 @app.route('/logout', methods=['POST'])
+@login_required
 def logout():
-    pass
+    session.pop('username', None)
+    session.pop('logged_in', None)
+    return redirect(url_for('login'))
 
 
 @app.route('/profile', methods=['GET', 'POST'])
+@login_required
 def profile():
-    # return redirect(url_for('login'))
     return render_template('profile.html')
