@@ -11,8 +11,8 @@ from simple_app.models import UserProfile
 
 @app.before_request
 def csrf_protect():
-    """Simple function to check if csrf_token exists in request
-    and is equal to session value
+    """Simple function for checking that csrf_token exists in request
+    and is equal to session csrf_token value
     """
     if request.method == "POST":
         token = session.pop('_csrf_token', None)
@@ -21,7 +21,7 @@ def csrf_protect():
 
 
 def generate_csrf_token():
-    """Function to generate csrf_token and add it to session"""
+    """Function for generating csrf_token and adding it to session"""
     if '_csrf_token' not in session:
         session['_csrf_token'] = sha256(urandom(128)).hexdigest()
     return session['_csrf_token']
@@ -45,7 +45,7 @@ def log_the_user_in(username):
 
 
 def login_required(f):
-    """ Login required decorator to protect resources from anonymous access """
+    """Login required decorator for protecting resources from anonymous access"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('logged_in'):
