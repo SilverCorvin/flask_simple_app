@@ -9,6 +9,7 @@ class UserProfile(db.Model):
     password = db.Column(db.String())
     lastname = db.Column(db.String())
     firstname = db.Column(db.String())
+    perms = db.Column(db.Integer, default=0)
 
     def __init__(self, username, password, lastname, firstname):
         self.username = username
